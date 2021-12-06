@@ -15,6 +15,8 @@ server.listen(port, function() {
 
 //Endpoints
 
+//POST
+
 server.post("/destinations", async (req, res) => {
 
     const { name, location, photo, description } = req.body;
@@ -49,6 +51,8 @@ server.post("/destinations", async (req, res) => {
 
 });
 
+//GET
+
 server.get("/", (req, res) => {
     res.send({message: "hi"})
 })
@@ -61,6 +65,7 @@ server.get("/destinations", (req, res) => {
 server.put("/destinations/:id", (req, res) => {
 
     const destId = req.params.id
+    console.log(destId)
 
     const { id, name, location, photo, description } = req.body
 
@@ -85,7 +90,7 @@ server.put("/destinations/:id", (req, res) => {
         }
     }
 
-    //console.log(destinations)
+    console.log(destinations)
     res.send(destinations)
     return res.json()
 
