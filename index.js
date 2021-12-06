@@ -9,7 +9,9 @@ server.use(express.json())//body parser
 
 
 const port = process.env.PORT || 3000;
-server.listen(port)
+server.listen(port, function() {
+    console.log(`server listening on ${port}`)
+})
 
 //Endpoints
 
