@@ -5,10 +5,10 @@ const { generateUniqueId } = require("./services")
 
 
 const server = express()
-server.use(express.json())//body parser
+server.use(express.json())//body parser 
 
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 server.listen(port)
 
 //Endpoints
@@ -48,7 +48,7 @@ server.post("/destinations", async (req, res) => {
 });
 
 server.get("/destinations", (req, res) => {
-    
+
     res.send(destinations)
 });
 
