@@ -1,12 +1,13 @@
 const express = require("express")
 const cors = require("cors")
 const fetch = require("node-fetch");
-let { db: destinations } = require("./db")
+const { db: destinations } = require("./db")
 const { generateUniqueId } = require("./services")
 
 
 const server = express()
 server.use(express.json())//body parser 
+server.use(cors());
 
 
 const port = process.env.PORT || 3000;
