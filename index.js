@@ -1,4 +1,5 @@
 const express = require("express")
+const cors = require("cors")
 const fetch = require("node-fetch");
 let { db: destinations } = require("./db")
 const { generateUniqueId } = require("./services")
@@ -57,7 +58,7 @@ server.get("/", (req, res) => {
     res.send({message: "hi"})
 })
 
-server.get("/destinations", (req, res) => {
+server.get("/destinations", cors(), (req, res) => {
 
     res.send(destinations)
 });
