@@ -1,7 +1,7 @@
 const express = require("express")
 const cors = require("cors")
 const fetch = require("node-fetch");
-const { db: destinations } = require("./db")
+let { db: destinations } = require("./db")
 const { generateUniqueId } = require("./services")
 
 
@@ -101,10 +101,10 @@ server.put("/destinations/:id", (req, res) => {
 server.delete("/destinations", (req, res) => {
 
     let destId = req.query.id
-    console.log(destId)
+    
     let newDestinations = destinations.filter((dest) => dest.id != destId)
 
     destinations = newDestinations
-
+    res.send(destinations)
     res.redirect("/destinations")
 })
