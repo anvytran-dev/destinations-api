@@ -98,15 +98,13 @@ server.put("/destinations/:id", (req, res) => {
 
 })
 
-server.delete("/destinations/:id", (req, res) => {
+server.delete("/destinations", (req, res) => {
 
-    let destId = req.params.id
-    
-    let newDestinations = destinations.filter(dest => dest.id != destId)
+    let destId = req.query.id
+    console.log(destId)
+    let newDestinations = destinations.filter((dest) => dest.id != destId)
 
     destinations = newDestinations
-    
-    res.send(destinations)
 
     res.redirect("/destinations")
 })
