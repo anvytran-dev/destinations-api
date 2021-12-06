@@ -66,7 +66,7 @@ server.get("/destinations", cors(), (req, res) => {
 
 server.put("/destinations/:id", (req, res) => {
 
-    const destId = req.params.id
+    let destId = req.params.id
     console.log(destId)
 
     const { id, name, location, photo, description } = req.body
@@ -101,11 +101,11 @@ server.put("/destinations/:id", (req, res) => {
 server.delete("/destinations/:id", (req, res) => {
 
     let destId = req.params.id
-
+    
     let newDestinations = destinations.filter(dest => dest.id != destId)
 
     destinations = newDestinations
-
+    
     res.send(destinations)
 
     res.redirect("/destinations")
