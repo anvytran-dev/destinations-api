@@ -47,6 +47,10 @@ server.post("/destinations", async (req, res) => {
 
 });
 
+server.get("/", (req, res) => {
+    res.send({message: "hi"})
+})
+
 server.get("/destinations", (req, res) => {
 
     res.send(destinations)
