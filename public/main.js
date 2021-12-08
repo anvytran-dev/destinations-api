@@ -1,5 +1,5 @@
-// const HEROKU_API_ROOT = "https://destinations-vacations-api.herokuapp.com"
-const HEROKU_API_ROOT = "http://localhost:3000"
+const HEROKU_API_ROOT = "https://destinations-vacations-api.herokuapp.com"
+// const HEROKU_API_ROOT = "http://localhost:3000"
 
 // Make a request to /GET destinations
 const destinations_url = `${HEROKU_API_ROOT}/destinations`
