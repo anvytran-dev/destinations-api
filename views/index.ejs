@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+
+    <link rel="stylesheet" href="css/style.css" />
+
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="liveAlertPlaceholder"></div>
+    <div class="container">
+      <div class="row">
+        <div id="heading" class="col-12">Heading</div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        <div id="form_container" class="col-6">
+          <h2>Form Container</h2>
+          <form class="">
+            <input name="name" id="input_name" type="text" placeholder="name" />
+            <input
+              name="location"
+              id="input_location"
+              type="text"
+              placeholder="location"
+            />
+            <input
+              name="photo"
+              id="input_photo"
+              type="url"
+              placeholder="photo"
+            />
+            <input
+              name="description"
+              id="input_description"
+              type="text"
+              placeholder="description"
+            />
+            <button id="button_form" type="submit">Submit</button>
+          </form>
+        </div>
+       
+        <div id="wistlist_container" class="d-flex flex-row col-6">
+          <% for(let i = 0; i < lugares.length; i++) { %>
+          <div class="card" style="width: 10rem">
+            <img class="card-img-top" src="<%=lugares[i].photo %>" alt="" style="height: 10rem">
+            <div class="card-body">
+              <h5 class="card-title"><%= lugares[i].name %></h5>
+              <p class="card-text"><%= lugares[i].location %></p>
+              <p class="card-text"><%= lugares[i].description %></p>
+
+              <button class="editButton btn-warning" destId=<%=lugares[i]._id%>>Edit me</button>
+              <button class="deleteButton btn-danger" destId=<%=lugares[i]._id%>>Delete me</button>
+
+
+            </div>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>

@@ -1,5 +1,6 @@
 const express = require("express")
 const cors = require("cors")
+const bodyParser = require('body-parser')
 const { MongoClient, ObjectId } = require("mongodb")
 const fetch = require("node-fetch");
 
@@ -9,6 +10,10 @@ const server = express()
 server.use(express.json())//body parser 
 server.use(cors());
 server.use(express.urlencoded({ extended: true }));
+
+server.set('view engine', 'ejs'); // set up ejs for templating
+server.use(express.static('public'))
+server.use(bodyParser.json())
 
 const MongoDB_URL = "mongodb+srv://anvytran:matcha@anvyrc.kuion.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
 
@@ -60,7 +65,7 @@ client.connect()
             }
 
             destinations.insertOne(dest);
-
+           
             res.redirect("/destinations")
 
         });
@@ -73,10 +78,11 @@ client.connect()
 
         server.get("/destinations", cors(), async (req, res) => {
             const data = await destinations.find({}).toArray()
-            res.send(data)
+        
+            res.render('./index.ejs', {lugares: data})
         });
 
-        server.put("/destinations/", async (req, res) => {
+        server.put("/destinations", async (req, res) => {
 
             const { id, name, location, description } = req.body
 
@@ -106,25 +112,37 @@ client.connect()
                 { _id: ObjectId(id) },
                 { $set: dest }
             )
+            .then(result => {
+                res.json('Success')
+              })
+             .catch(error => console.error(error))
+         
+                
             return res.json(updatedDest)
 
 
         })
 
-        server.delete("/destinations", async (req, res) => {
+        server.delete("/destinations/:id", async (req, res) => {
 
-            let  destId  = req.query.id
-    
-            try {
+            let {id}  = req.params
+            console.log(id)
+            
+            // destinations.deleteOne(
+            //     { _id: ObjectId(id) }
+            //   )
+            //     .then(result => {
+            //         console.log('hi')
+            //     console.log(res)
+            //       return res.json()
+            //     })
+            //     .catch(error => console.error(error))
 
-                const deleteDest = await destinations.findOneAndDelete(
-                    { _id: ObjectId(destId) }
-                )
-                return res.json(deleteDest)
-            } catch {
-                console.log('cant delete')
-            }
-
+            const delDest = await destinations.findOneAndDelete(
+                { _id: ObjectId(id) }
+            )
+            //how do i send destinations back?
+            return res.json(delDest)
 
         })
 
