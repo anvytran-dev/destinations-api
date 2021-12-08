@@ -1,136 +1,149 @@
 const express = require("express")
 const cors = require("cors")
+const { MongoClient, ObjectId } = require("mongodb")
 const fetch = require("node-fetch");
-let { db: destinations } = require("./db")
-const { generateUniqueId } = require("./services")
+
 
 
 const server = express()
 server.use(express.json())//body parser 
 server.use(cors());
+server.use(express.urlencoded({ extended: true }));
 
+const MongoDB_URL = "mongodb+srv://anvytran:matcha@anvyrc.kuion.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
 
-const port = process.env.PORT || 3000;
-server.listen(port, function() {
-    console.log(`server listening on ${port}`)
-})
+const client = new MongoClient(MongoDB_URL)
 
-//Endpoints
+const dbName = 'destinationsDB'
 
-//POST
+client.connect()
+    .then(() => {
+        const db = client.db(dbName)
 
-server.post("/destinations", async (req, res) => {
+        const destinations = db.collection("destinations")
 
-    const { name, location, photo, description } = req.body;
+        const port = process.env.PORT || 3000;
+        server.listen(port, function () {
+            console.log(`server listening on ${port}`)
+        })
 
-    // Make sure we have a name and location
+        //Endpoints
 
-    if (name === undefined || name.length === 0 || location === undefined || location.length === 0) {
-        return res
-            .status(400)
-            .json({ message: "Name and location are both required" })
-    }
-    const dest = { id: generateUniqueId(), name, location, photo, description };
+        //POST
 
-    const API_KEY = "2vAoc_zs73pmQGlzynGD8AsbJmMCu-V3TjCKc5Kqu3I"
-    const UNSPLASH_URL = `https://api.unsplash.com/photos/random/?client_id=QsPtItqyx9-VpUsYx2K7DlLKcxJ-Kg6EthZ1LimBMy8&query=${name}`
-    console.log(UNSPLASH_URL)
+        server.post("/destinations", async (req, res) => {
 
-    try {
-        const res = await fetch(UNSPLASH_URL)
-        const data = await res.json()
+            const { name, location, photo, description } = req.body;
 
-        dest.photo = data.urls.small
+            // Make sure we have a name and location
 
-    } catch (error) {
-        //placeholder photo
-        console.log("error")
-    }
+            if (name === undefined || name.length === 0 || location === undefined || location.length === 0) {
+                return res
+                    .status(400)
+                    .json({ message: "Name and location are both required" })
+            }
+            const dest = { name, location, photo, description };
 
-    destinations.push(dest);
+            const API_KEY = "2vAoc_zs73pmQGlzynGD8AsbJmMCu-V3TjCKc5Kqu3I"
+            const UNSPLASH_URL = `https://api.unsplash.com/photos/random/?client_id=QsPtItqyx9-VpUsYx2K7DlLKcxJ-Kg6EthZ1LimBMy8&query=${name}`
+            console.log(UNSPLASH_URL)
 
-    res.redirect("/destinations")
+            try {
+                let result = await fetch(UNSPLASH_URL)
+                const data = await result.json()
 
-});
+                dest.photo = data.urls.small
 
-//GET
-
-server.get("/", (req, res) => {
-    res.send({message: "hi"})
-})
-
-server.get("/destinations", cors(), (req, res) => {
-
-    res.send(destinations)
-});
-
-server.put("/destinations/", async (req, res) => {
-
-    const { id, name, location, description } = req.body
-
-    if(id === undefined) {
-        return res.status(400).json({ message: "id is required" })
-    }
-
-    if(name !== undefined && name.length === 0 ) {
-        return res.status(400).json({ message: "name can't be empty" })
-    }
-
-    if(location !== undefined && location.length === 0 ) {
-        return res.status(400).json({ message: "location can't be empty" })
-    }
-
-    for (const dest of destinations) {
-        if (dest.id === destId) {
-
-            if (name !== undefined) {
-                dest.name = name
+            } catch (error) {
+                //placeholder photo
+                console.log("error")
             }
 
-            if (location !== undefined) {
-                dest.location = location;
+            destinations.insertOne(dest);
+
+            res.redirect("/destinations")
+
+        });
+
+        //GET
+
+        server.get("/", (req, res) => {
+            res.send({ message: "hi" })
+        })
+
+        server.get("/destinations", cors(), async (req, res) => {
+            const data = await destinations.find({}).toArray()
+            res.send(data)
+        });
+
+        server.put("/destinations/", async (req, res) => {
+
+            const { id, name, location, description } = req.body
+
+            if (id === undefined) {
+                return res.status(400).json({ message: "id is required" })
             }
 
-            if(name !== undefined || location !== undefined) {
-                dest.photo = await getUnsplashPhoto({
-                    name: dest.name,
-                    location: dest.location
-                })
+            if (name !== undefined && name.length === 0) {
+                return res.status(400).json({ message: "name can't be empty" })
             }
+
+            if (location !== undefined && location.length === 0) {
+                return res.status(400).json({ message: "location can't be empty" })
+            }
+
+            const dest = {
+                name: name,
+                location: location,
+                photo: await getUnsplashPhoto({ name, location })
+            };
 
             if (description !== undefined) {
                 dest.description = description;
             }
-        }
-    }
-    return res.json(dest)
 
-})
+            const updatedDest = await destinations.findOneAndUpdate(
+                { _id: ObjectId(id) },
+                { $set: dest }
+            )
+            return res.json(updatedDest)
 
-server.delete("/destinations", (req, res) => {
 
-    let destId = req.query.id
+        })
+
+        server.delete("/destinations", async (req, res) => {
+
+            let  destId  = req.query.id
     
-    let newDestinations = destinations.filter((dest) => dest.id != destId)
+            try {
 
-    destinations = newDestinations
-    res.send(destinations)
-    res.redirect( 303, "/destinations")
-})
+                const deleteDest = await destinations.findOneAndDelete(
+                    { _id: ObjectId(destId) }
+                )
+                return res.json(deleteDest)
+            } catch {
+                console.log('cant delete')
+            }
 
-function getUnsplashPhoto(name, location) {
-    const API_KEY = "2vAoc_zs73pmQGlzynGD8AsbJmMCu-V3TjCKc5Kqu3I"
-    const UNSPLASH_URL = `https://api.unsplash.com/photos/random/?client_id=QsPtItqyx9-VpUsYx2K7DlLKcxJ-Kg6EthZ1LimBMy8&query=${name}`
-    console.log(UNSPLASH_URL)
 
-    try {
-        const res = await fetch(UNSPLASH_URL)
-        const data = await res.json()
+        })
 
-        return data.urls.small
+        async function getUnsplashPhoto(name, location) {
+            const API_KEY = "2vAoc_zs73pmQGlzynGD8AsbJmMCu-V3TjCKc5Kqu3I"
+            const UNSPLASH_URL = `https://api.unsplash.com/photos/random/?client_id=QsPtItqyx9-VpUsYx2K7DlLKcxJ-Kg6EthZ1LimBMy8&query=${name}`
+            console.log(UNSPLASH_URL)
 
-    } catch (error) {
-        //placeholder photo
-        console.log("error")
-    }
-}
+            try {
+                let result = await fetch(UNSPLASH_URL)
+                const data = await result.json()
+
+                return data.urls.small
+
+            } catch (error) {
+                //placeholder photo
+                console.log("error")
+            }
+        }
+
+    })
+
